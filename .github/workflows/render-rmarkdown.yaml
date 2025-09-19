@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '**.Rmd'   # Se activa cuando cambie cualquier archivo .Rmd
+      - '**.Rmd'
 
 jobs:
   build:
@@ -25,21 +25,34 @@ jobs:
       - name: Render all Rmd files
         run: |
           Rscript -e '
+            print("=== Archivos Rmd detectados ===")
             files <- list.files(pattern="*.Rmd", recursive=TRUE)
+            print(files)
+            if (length(files) == 0) {
+              stop("No se encontraron archivos .Rmd en el repo")
+            }
             dir.create("docs", showWarnings = FALSE)
             for (f in files) {
+              print(paste("Renderizando:", f))
               name <- tools::file_path_sans_ext(basename(f))
-              rmarkdown::render(f, output_format="html_document", 
-                                output_file=file.path("docs", paste0(name, ".html")))
-              rmarkdown::render(f, output_format="pdf_document", 
-                                output_file=file.path("docs", paste0(name, ".pdf")))
-              rmarkdown::render(f, output_format="word_document", 
-                                output_file=file.path("docs", paste0(name, ".docx")))
-            }'
+              tryCatch({
+                rmarkdown::render(f, output_format="html_document",
+                                  output_file=file.path("docs", paste0(name, ".html")))
+                rmarkdown::render(f, output_format="pdf_document",
+                                  output_file=file.path("docs", paste0(name, ".pdf")))
+                rmarkdown::render(f, output_format="word_document",
+                                  output_file=file.path("docs", paste0(name, ".docx")))
+              }, error=function(e) {
+                print(paste("Error en", f, ":", e$message))
+              })
+            }
+            print("=== Archivos en docs/ ===")
+            print(list.files("docs"))'
 
       - name: Commit and push rendered outputs
         run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@github.com"
           git add docs/
-          git commit -m "Aut
+          git commit -m "Auto-update rendered outputs (HTML, PDF, DOCX)" || echo "No changes to commit"
+          git push
