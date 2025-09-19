@@ -22,16 +22,21 @@ jobs:
           Rscript -e 'install.packages(c("rmarkdown","knitr","tinytex"))'
           Rscript -e 'tinytex::install_tinytex()'
 
-      - name: Render all Rmd files
+       - name: Render all Rmd files
         run: |
-          Rscript -e 'files <- list.files(pattern="*.Rmd", recursive=TRUE); \
-                      dir.create("docs", showWarnings = FALSE); \
-                      for (f in files) { \
-                        name <- tools::file_path_sans_ext(basename(f)); \
-                        rmarkdown::render(f, output_format="html_document", output_file=file.path("docs", paste0(name, ".html"))); \
-                        rmarkdown::render(f, output_format="pdf_document", output_file=file.path("docs", paste0(name, ".pdf"))); \
-                        rmarkdown::render(f, output_format="word_document", output_file=file.path("docs", paste0(name, ".docx"))); \
-                      }'
+          Rscript -e '
+            files <- list.files(pattern="*.Rmd", recursive=TRUE)
+            dir.create("docs", showWarnings = FALSE)
+            for (f in files) {
+              name <- tools::file_path_sans_ext(basename(f))
+              rmarkdown::render(f, output_format="html_document", 
+                                output_file=file.path("docs", paste0(name, ".html")))
+              rmarkdown::render(f, output_format="pdf_document", 
+                                output_file=file.path("docs", paste0(name, ".pdf")))
+              rmarkdown::render(f, output_format="word_document", 
+                                output_file=file.path("docs", paste0(name, ".docx")))
+            }'
+
 
       - name: Commit and push rendered outputs
         run: |
