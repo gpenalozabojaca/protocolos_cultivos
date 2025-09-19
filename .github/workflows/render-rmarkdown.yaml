@@ -22,7 +22,7 @@ jobs:
           Rscript -e 'install.packages(c("rmarkdown","knitr","tinytex"))'
           Rscript -e 'tinytex::install_tinytex()'
 
-       - name: Render all Rmd files
+      - name: Render all Rmd files
         run: |
           Rscript -e '
             files <- list.files(pattern="*.Rmd", recursive=TRUE)
@@ -37,11 +37,9 @@ jobs:
                                 output_file=file.path("docs", paste0(name, ".docx")))
             }'
 
-
       - name: Commit and push rendered outputs
         run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@github.com"
           git add docs/
-          git commit -m "Auto-update rendered outputs (HTML, PDF, DOCX)" || echo "No changes to commit"
-          git push
+          git commit -m "Aut
