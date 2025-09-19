@@ -1,10 +1,10 @@
-name: Render R Markdown and Deploy
+name: Render all Rmd to HTML, PDF, DOCX
 
 on:
   push:
     branches: [ main ]
     paths:
-      - '**.Rmd'
+      - '**.Rmd'   # Se activa cuando cambie cualquier archivo .Rmd
 
 jobs:
   build:
@@ -19,20 +19,24 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e 'install.packages(c("rmarkdown", "knitr"))'
-          Rscript -e 'install.packages("tinytex")'
+          Rscript -e 'install.packages(c("rmarkdown","knitr","tinytex"))'
           Rscript -e 'tinytex::install_tinytex()'
 
-      - name: Render R Markdown to HTML, PDF, DOCX
+      - name: Render all Rmd files
         run: |
-          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "html_document", output_file = "docs/index.html")'
-          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "pdf_document", output_file = "docs/index.pdf")'
-          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "word_document", output_file = "docs/index.docx")'
+          Rscript -e 'files <- list.files(pattern="*.Rmd", recursive=TRUE); \
+                      dir.create("docs", showWarnings = FALSE); \
+                      for (f in files) { \
+                        name <- tools::file_path_sans_ext(basename(f)); \
+                        rmarkdown::render(f, output_format="html_document", output_file=file.path("docs", paste0(name, ".html"))); \
+                        rmarkdown::render(f, output_format="pdf_document", output_file=file.path("docs", paste0(name, ".pdf"))); \
+                        rmarkdown::render(f, output_format="word_document", output_file=file.path("docs", paste0(name, ".docx"))); \
+                      }'
 
       - name: Commit and push rendered outputs
         run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@github.com"
-          git add docs/index.html docs/index.pdf docs/index.docx
-          git commit -m "Auto-update HTML, PDF, and DOCX from Rmd" || echo "No changes to commit"
+          git add docs/
+          git commit -m "Auto-update rendered outputs (HTML, PDF, DOCX)" || echo "No changes to commit"
           git push
