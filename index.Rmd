@@ -54,7 +54,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-Protocols for the preparation and use of different culture media applied to for *Hornworts, Cyanobacteria, Cycas and Zamia Seedlings*. Each section includes media composition, step-by-step preparation, and notes for practical application used in the Villarreal Lab. 
+Protocols for the preparation and use of different culture media applied to for *Hornworts, Cyanobacteria, Cycas and Zamia Seedlings*. Each section includes media composition, step-by-step preparation, and notes for practical application used in the Villarreal Lab.  
 *This document is intended as a working guide; for further methodological details and theoretical background, readers are encouraged to consult the primary references listed at the end of each protocol.*
 
 # Hatcher medium (AG) for Hornwort solid and liquid culture
