@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - '**.Rmd'   # Solo se activa si cambias un archivo Rmd
+      - '**.Rmd'
 
 jobs:
   build:
@@ -20,15 +20,19 @@ jobs:
       - name: Install dependencies
         run: |
           Rscript -e 'install.packages(c("rmarkdown", "knitr"))'
+          Rscript -e 'install.packages("tinytex")'
+          Rscript -e 'tinytex::install_tinytex()'
 
-      - name: Render R Markdown
+      - name: Render R Markdown to HTML, PDF, DOCX
         run: |
-          Rscript -e 'rmarkdown::render("index.Rmd", output_file = "docs/index.html")'
+          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "html_document", output_file = "docs/index.html")'
+          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "pdf_document", output_file = "docs/index.pdf")'
+          Rscript -e 'rmarkdown::render("index.Rmd", output_format = "word_document", output_file = "docs/index.docx")'
 
-      - name: Commit and push rendered HTML
+      - name: Commit and push rendered outputs
         run: |
           git config --local user.name "github-actions"
           git config --local user.email "github-actions@github.com"
-          git add docs/index.html
-          git commit -m "Auto-update HTML from Rmd" || echo "No changes to commit"
+          git add docs/index.html docs/index.pdf docs/index.docx
+          git commit -m "Auto-update HTML, PDF, and DOCX from Rmd" || echo "No changes to commit"
           git push
